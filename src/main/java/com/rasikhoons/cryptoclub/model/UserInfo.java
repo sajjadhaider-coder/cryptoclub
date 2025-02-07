@@ -26,7 +26,7 @@ public class UserInfo {
     @NotNull
     @Column(name = "USER_NAME", unique = true, nullable = false, length = 20)
     @JsonIgnore // Hide sensitive data if necessary
-    private String username;
+    private String userName;
 
     @NotNull
     @Column(name = "VERIFICATION_CODE", length = 10)
@@ -63,4 +63,14 @@ public class UserInfo {
     @Column(name = "UPDATED_BY")
     private String updatedBy;
 
+    @PrePersist
+    public void prePersist() {
+        if (createdAt == null) {
+            createdAt = LocalDateTime.now();  // Set the current timestamp when the entity is persisted
+        }
+
+        if (updatedAt == null) {
+            updatedAt = LocalDateTime.now();  // Set the current timestamp when the entity is persisted
+        }
+    }
 }

@@ -42,7 +42,7 @@ public class SecurityConfig {
 
                         // Public endpoints
                         .requestMatchers("/crypto/**", "/result/getResult", "/api/v1/login", "/api/v1/refreshToken").permitAll()
-
+                        .requestMatchers("/api/**").permitAll()
                         // Secured endpoints
                         .requestMatchers("/api/v1/**").authenticated()
                 )
