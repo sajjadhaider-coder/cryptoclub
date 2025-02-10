@@ -8,6 +8,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Entity
@@ -62,6 +63,21 @@ public class UserInfo {
 
     @Column(name = "UPDATED_BY")
     private String updatedBy;
+
+    @Column(name = "user_Type")
+    private String userType;
+
+    @Column(name = "refId")
+    private Long refId;
+
+    @Column(name = "parentRefId")
+    private Long parentRefId;
+
+    @Column(name = "balance", columnDefinition = "Decimal (10, 2)")
+    private BigDecimal balance = BigDecimal.ZERO;
+
+    @Column(name = "isAgent", columnDefinition = "BigInt default '0'")
+    private Boolean isAgent;
 
     @PrePersist
     public void prePersist() {
