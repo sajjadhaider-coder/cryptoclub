@@ -4,14 +4,19 @@ import com.rasikhoons.cryptoclub.Repository.CoinsRepo;
 import com.rasikhoons.cryptoclub.dto.ApiResponse;
 import com.rasikhoons.cryptoclub.dto.CoinsDTO;
 import com.rasikhoons.cryptoclub.model.Coins;
+import com.rasikhoons.cryptoclub.response.CoinsResponse;
+import com.rasikhoons.cryptoclub.response.PaginationResponse;
+import com.rasikhoons.cryptoclub.response.PaginationResponse.PaginationDetail;
 import jakarta.transaction.Transactional;
-import lombok.extern.log4j.Log4j;
-import org.apache.catalina.mapper.Mapper;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -99,5 +104,35 @@ public class CoinsService {
             //new ResponseEntity<>(apiResponse, HttpStatusCode.valueOf(HttpStatus.INTERNAL_SERVER_ERROR.value()));
             return apiResponse;
         }
+    }
+
+    public PaginationResponse getPaginatedList(Integer pageNo, Integer pageSize) {
+        PaginationResponse paginationResponse = null;
+        List<CoinsResponse> coinPageDTO = new ArrayList<>();
+        PageRequest coinPageRequest = PageRequest.of(pageNo, pageSize);
+        Page<Coins> coinsPage = coinsRepo.findAll(coinPageRequest);
+        List<Coins> coinsList = coinsPage.getContent();
+        try {
+            if (!coinsList.isEmpty()) {
+                List<Coins> getCoinList = new ArrayList<>(coinsList);
+                getCoinList.forEach(coin -> {
+                    CoinsResponse coinsResponse = mapper.map(coin, CoinsResponse.class);
+                    coinPageDTO.add(coinsResponse);
+                });
+                Long totalElements = coinsPage.getTotalElements();
+                long totalPages = totalElements / pageSize;
+
+                PaginationDetail paginationDetail = new PaginationDetail(pageNo, totalPages, pageSize,
+                        totalElements);
+                paginationResponse = new PaginationResponse(HttpStatus.OK.value(), "coin found Successfully!", coinPageDTO, paginationDetail);
+
+            } else {
+                paginationResponse = new PaginationResponse(HttpStatus.BAD_REQUEST.value(), "coin not found Successfully!", null, null);
+            }
+        } catch (Exception e) {
+            paginationResponse = new PaginationResponse(HttpStatus.INTERNAL_SERVER_ERROR.value(), e.getMessage(), null, null);
+            return paginationResponse;
+        }
+        return paginationResponse;
     }
 }

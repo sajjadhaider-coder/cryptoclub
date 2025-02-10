@@ -34,6 +34,21 @@ public class Transactions {
     @Column(name = "currency")
     private String currency;
 
+    @Column(name = "coinId")
+    private Long coinId;
+
+    @Column(name = "coinQty", columnDefinition = "Decimal(10, 2)")
+    private BigDecimal coinQty = BigDecimal.ZERO;
+
+    @Column(name = "userIdBy")
+    private String userIdBy;
+
+    @Column(name = "transactionType")
+    private String transactionType;
+
+    @Column(name = "transactionStatus")
+    private String transactionStatus;
+
     @PrePersist
     public void prePersist() {
         if (transferredAt == null) {

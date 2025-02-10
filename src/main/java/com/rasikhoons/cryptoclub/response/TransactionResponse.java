@@ -14,4 +14,9 @@ public class TransactionResponse {
     private BigDecimal amountTransferred = BigDecimal.ZERO;
     private LocalDateTime transferredAt;
     private String currency;
+    private Long coinId;
+    private BigDecimal coinQty;
+    private String userIdBy;
+    private String transactionType;
+    private String transactionStatus;
 }
