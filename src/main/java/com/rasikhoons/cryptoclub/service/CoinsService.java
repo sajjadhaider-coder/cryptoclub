@@ -33,8 +33,10 @@ public class CoinsService {
         ApiResponse apiResponse;
         try {
             Coins coins = mapper.map(coinsDTO, Coins.class);
-            coinsRepo.save(coins);
-            apiResponse = new ApiResponse(HttpStatus.OK.value(), "Coins create Successfully!", null);
+            coins = coinsRepo.save(coins);
+
+            CoinsResponse coinsResponse = mapper.map(coins, CoinsResponse.class);
+            apiResponse = new ApiResponse(HttpStatus.OK.value(), "Coins create Successfully!", coinsResponse);
 
             return apiResponse;
         } catch (Exception e) {
@@ -56,8 +58,10 @@ public class CoinsService {
                 if (coinsDTO.getCurrentPrice() != null) {
                     coins.get().setCurrentPrice(coinsDTO.getCurrentPrice());
                 }
-                coinsRepo.save(coins.get());
-                apiResponse = new ApiResponse(HttpStatus.OK.value(), "Coins update Successfully!", null);
+                coins = Optional.of(coinsRepo.save(coins.get()));
+
+                CoinsResponse coinsResponse = mapper.map(coins.get(), CoinsResponse.class);
+                apiResponse = new ApiResponse(HttpStatus.OK.value(), "Coins update Successfully!", coinsResponse);
             } else {
                 apiResponse = new ApiResponse(HttpStatus.BAD_REQUEST.value(), "Coins not found!", null);
             }
@@ -93,15 +97,14 @@ public class CoinsService {
         try {
             Optional<Coins> coins = coinsRepo.findById(id);
             if (coins.isPresent()) {
-                CoinsDTO coinsDTO = mapper.map(coins.get(), CoinsDTO.class);
-                apiResponse = new ApiResponse(HttpStatus.OK.value(), "Coins found Successfully!", coinsDTO);
+                CoinsResponse coinsResponse = mapper.map(coins.get(), CoinsResponse.class);
+                apiResponse = new ApiResponse(HttpStatus.OK.value(), "Coins found Successfully!", coinsResponse);
             } else {
                 apiResponse = new ApiResponse(HttpStatus.BAD_REQUEST.value(), "Coins not found!", null);
             }
             return apiResponse;
         } catch (Exception e) {
             apiResponse = new ApiResponse(HttpStatus.INTERNAL_SERVER_ERROR.value(), e.getMessage(), null);
-            //new ResponseEntity<>(apiResponse, HttpStatusCode.valueOf(HttpStatus.INTERNAL_SERVER_ERROR.value()));
             return apiResponse;
         }
     }

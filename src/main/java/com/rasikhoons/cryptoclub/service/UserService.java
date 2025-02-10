@@ -39,8 +39,10 @@ public class UserService {
             if (userInfo == null) {
                 UserInfo user = mapper.map(userDTO, UserInfo.class);
                 user.setPassword(passwordEncoder.encode(userDTO.getPassword()));
-                userRepo.save(user);
-                apiResponse = new ApiResponse(HttpStatus.OK.value(), "user create Successfully!", null);
+                user = userRepo.save(user);
+
+                UserResponse userResponse = mapper.map(user, UserResponse.class);
+                apiResponse = new ApiResponse(HttpStatus.OK.value(), "user create Successfully!", userResponse);
             } else {
                 apiResponse = new ApiResponse(HttpStatus.BAD_REQUEST.value(), "user name already exist! " + userDTO.getUserName(), null);
             }
@@ -62,8 +64,9 @@ public class UserService {
                 UserInfo user = userInfo.get();
                 mapper.map(userDTO, user);
                 user.setPassword(passwordEncoder.encode(userDTO.getPassword()));
-                userRepo.save(user);
-                apiResponse = new ApiResponse(HttpStatus.OK.value(), "user update Successfully!", null);
+                user = userRepo.save(user);
+                UserResponse userResponse = mapper.map(user, UserResponse.class);
+                apiResponse = new ApiResponse(HttpStatus.OK.value(), "user update Successfully!", userResponse);
             } else {
                 apiResponse = new ApiResponse(HttpStatus.BAD_REQUEST.value(), "user not found!", null);
             }

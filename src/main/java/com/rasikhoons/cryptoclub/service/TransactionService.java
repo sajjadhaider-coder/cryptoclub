@@ -32,9 +32,9 @@ public class TransactionService {
         ApiResponse apiResponse;
         try {
             Transactions transaction = mapper.map(transactionDTO, Transactions.class);
-            transactionRepo.save(transaction);
-
-            apiResponse = new ApiResponse(HttpStatus.OK.value(), "transaction create Successfully!", null);
+            transaction = transactionRepo.save(transaction);
+            TransactionResponse transactionResponse = mapper.map(transaction, TransactionResponse.class);
+            apiResponse = new ApiResponse(HttpStatus.OK.value(), "transaction create Successfully!", transactionResponse);
             return apiResponse;
         } catch (Exception e) {
             e.printStackTrace();

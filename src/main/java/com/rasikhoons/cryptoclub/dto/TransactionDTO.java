@@ -7,7 +7,7 @@ import java.math.BigDecimal;
 
 @Data
 public class TransactionDTO {
-
+    private long id;
     private String transferredBy;
     private BigDecimal amountTransferred = BigDecimal.ZERO;
     private String currency;
