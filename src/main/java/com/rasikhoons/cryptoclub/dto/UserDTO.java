@@ -16,10 +16,10 @@ public class UserDTO {
     private String status;
     private String ipAddress;
     private String userLocation;
-    private int userId;
+    private long userId;
     private String userType;
     private long refId;
     private long parentRefId;
     private BigDecimal balance;
-    private boolean isAgent;
+    private Boolean isAgent;
 }

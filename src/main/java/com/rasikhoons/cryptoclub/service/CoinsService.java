@@ -32,16 +32,19 @@ public class CoinsService {
     public ApiResponse save(CoinsDTO coinsDTO) {
         ApiResponse apiResponse;
         try {
-            Coins coins = mapper.map(coinsDTO, Coins.class);
-            coins = coinsRepo.save(coins);
+            Coins existingCoin = coinsRepo.findByCoinsName(coinsDTO.getCoinsName());
+            if (existingCoin == null) {
+                Coins coins = mapper.map(coinsDTO, Coins.class);
+                coins = coinsRepo.save(coins);
 
-            CoinsResponse coinsResponse = mapper.map(coins, CoinsResponse.class);
-            apiResponse = new ApiResponse(HttpStatus.OK.value(), "Coins create Successfully!", coinsResponse);
-
+                CoinsResponse coinsResponse = mapper.map(coins, CoinsResponse.class);
+                apiResponse = new ApiResponse(HttpStatus.OK.value(), "Coins create Successfully!", coinsResponse);
+            } else {
+                apiResponse = new ApiResponse(HttpStatus.BAD_REQUEST.value(), "Coins already Exist!", null);
+            }
             return apiResponse;
         } catch (Exception e) {
             apiResponse = new ApiResponse(HttpStatus.INTERNAL_SERVER_ERROR.value(), e.getMessage(), null);
-            //new ResponseEntity<>(apiResponse, HttpStatusCode.valueOf(HttpStatus.INTERNAL_SERVER_ERROR.value()));
             return apiResponse;
         }
     }
@@ -68,7 +71,6 @@ public class CoinsService {
             return apiResponse;
         } catch (Exception e) {
             apiResponse = new ApiResponse(HttpStatus.INTERNAL_SERVER_ERROR.value(), e.getMessage(), null);
-            //new ResponseEntity<>(apiResponse, HttpStatusCode.valueOf(HttpStatus.INTERNAL_SERVER_ERROR.value()));
             return apiResponse;
         }
     }

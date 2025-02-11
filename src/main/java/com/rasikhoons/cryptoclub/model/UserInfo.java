@@ -56,7 +56,7 @@ public class UserInfo {
     private String createdBy;
 
     @Column(name = "USER_ID", nullable = false)
-    private int userId;
+    private Long userId;
 
     @Column(name = "UPDATED_AT")
     private LocalDateTime updatedAt;
@@ -77,7 +77,7 @@ public class UserInfo {
     private BigDecimal balance = BigDecimal.ZERO;
 
     @Column(name = "isAgent", columnDefinition = "BigInt default '0'")
-    private Boolean isAgent;
+    private Boolean isAgent = false;
 
     @PrePersist
     public void prePersist() {

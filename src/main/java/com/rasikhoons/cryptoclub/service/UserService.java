@@ -9,6 +9,8 @@ import com.rasikhoons.cryptoclub.response.PaginationResponse.PaginationDetail;
 import com.rasikhoons.cryptoclub.response.UserResponse;
 import jakarta.transaction.Transactional;
 import org.modelmapper.ModelMapper;
+import org.springframework.beans.BeanUtils;
+import com.rasikhoons.cryptoclub.Utils.CommonUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -62,8 +64,19 @@ public class UserService {
             Optional<UserInfo> userInfo = userRepo.findById(userDTO.getId());
             if (userInfo.isPresent()) {
                 UserInfo user = userInfo.get();
-                mapper.map(userDTO, user);
-                user.setPassword(passwordEncoder.encode(userDTO.getPassword()));
+
+                // Use BeanUtils to copy non-null fields from userDTO to user
+                BeanUtils.copyProperties(userDTO, user, CommonUtils.getNullPropertyNames(userDTO));
+
+                // Handle password encoding if changed
+                if (userDTO.getPassword() != null && !userDTO.getPassword().equals(user.getPassword())) {
+                    user.setPassword(passwordEncoder.encode(userDTO.getPassword()));
+                }
+
+                if (Long.valueOf(userDTO.getUserId()) != null) {
+                    user.setUserId(userDTO.getUserId());
+                }
+
                 user = userRepo.save(user);
                 UserResponse userResponse = mapper.map(user, UserResponse.class);
                 apiResponse = new ApiResponse(HttpStatus.OK.value(), "user update Successfully!", userResponse);
@@ -73,7 +86,6 @@ public class UserService {
             return apiResponse;
         } catch (Exception e) {
             apiResponse = new ApiResponse(HttpStatus.INTERNAL_SERVER_ERROR.value(), e.getMessage(), null);
-            //new ResponseEntity<>(apiResponse, HttpStatusCode.valueOf(HttpStatus.INTERNAL_SERVER_ERROR.value()));
             return apiResponse;
         }
     }
@@ -92,7 +104,6 @@ public class UserService {
             return apiResponse;
         } catch (Exception e) {
             apiResponse = new ApiResponse(HttpStatus.INTERNAL_SERVER_ERROR.value(), e.getMessage(), null);
-            //new ResponseEntity<>(apiResponse, HttpStatusCode.valueOf(HttpStatus.INTERNAL_SERVER_ERROR.value()));
             return apiResponse;
         }
     }
@@ -110,7 +121,6 @@ public class UserService {
             return apiResponse;
         } catch (Exception e) {
             apiResponse = new ApiResponse(HttpStatus.INTERNAL_SERVER_ERROR.value(), e.getMessage(), null);
-            //new ResponseEntity<>(apiResponse, HttpStatusCode.valueOf(HttpStatus.INTERNAL_SERVER_ERROR.value()));
             return apiResponse;
         }
     }
@@ -144,4 +154,5 @@ public class UserService {
         }
         return paginationResponse;
     }
+
 }

@@ -8,7 +8,7 @@ import java.math.BigDecimal;
 public class UserResponse {
 
     private long id;
-    private String username;
+    private String userName;
     private String deviceType;
     private String status;
     private String ipAddress;
@@ -18,5 +18,5 @@ public class UserResponse {
     private long refId;
     private long parentRefId;
     private BigDecimal balance;
-    private boolean isAgent;
+    private Boolean isAgent;
 }
