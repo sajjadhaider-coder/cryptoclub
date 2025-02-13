@@ -42,7 +42,7 @@ public class WalletService {
         try {
             Wallet wallet = mapper.map(walletDTO, Wallet.class);
             if (walletDTO.getFile() != null) {
-                wallet.setTransferAmount(uploadFile(walletDTO.getFile()));
+                wallet.setTransferAmount(uploadFile(walletDTO.getFile(), walletDTO.getUserId()));
             }
             wallet = walletRepo.save(wallet);
 
@@ -62,6 +62,10 @@ public class WalletService {
             Optional<Wallet> wallet = walletRepo.findById(walletDTO.getId());
             if (wallet.isPresent()) {
                 mapper.map(walletDTO, wallet.get());
+                if (walletDTO.getFile() != null) {
+                    fileDelete(wallet.get().getTransferAmount());
+                    wallet.get().setTransferAmount(uploadFile(walletDTO.getFile(), walletDTO.getUserId()));
+                }
                 wallet.get().setLastedUpdated(LocalDateTime.now());
                 walletRepo.save(wallet.get());
                 WalletResponse walletResponse = mapper.map(wallet.get(), WalletResponse.class);
@@ -81,6 +85,9 @@ public class WalletService {
         try {
             Optional<Wallet> wallet = walletRepo.findById(id);
             if (wallet.isPresent()) {
+                if (wallet.get().getTransferAmount() != null && !wallet.get().getTransferAmount().isBlank()) {
+                    fileDelete(wallet.get().getTransferAmount());
+                }
                 walletRepo.delete(wallet.get());
 
                 apiResponse = new ApiResponse(HttpStatus.OK.value(), "wallet delete Successfully!", null);
@@ -142,11 +149,11 @@ public class WalletService {
         return paginationResponse;
     }
 
-    public String uploadFile(MultipartFile file) throws IOException {
+    public String uploadFile(MultipartFile file, Long userId) throws IOException {
         // Generate a unique filename to avoid overwriting
         String originalFilename = file.getOriginalFilename();
         String extension = originalFilename.substring(originalFilename.lastIndexOf("."));
-        String uniqueFilename = System.currentTimeMillis() + extension;
+        String uniqueFilename = System.currentTimeMillis() + "–" + userId + extension;
 
         // Create upload directory if it doesn't exist
         File uploadDirectory = new File(uploadDir);
@@ -163,4 +170,51 @@ public class WalletService {
 
         return fileUrl;
     }
+
+//    public String fileUpdate(MultipartFile newFile, Long userId) throws IOException {
+//        List<String> fileList = getAllFiles(uploadDir);
+//        fileList.forEach(file -> {
+//            fileDelete(uploadDir.concat(fileName));
+//        });
+//        return uploadFile(newFile, userId);
+//    }
+
+    public void fileDelete(String filePath) {
+        // Specify the path of the file to be deleted
+        File file = new File(filePath);
+        // Check if the file exists and delete it
+        if (file.exists()) {
+            file.delete();
+        }
+    }
+
+//    public List<String> getAllFiles(String directoryPath) {
+//        // Specify the directory path
+//        File directory = new File(directoryPath);
+//        List<String> fileName = new ArrayList<>();
+//        // Get all files and directories in the specified directory
+//        if (directory.exists() && directory.isDirectory()) {
+//            File[] files = directory.listFiles();
+//
+//            if (files != null) {
+//                for (File file : files) {
+//                    if (file.isFile()) {
+//                        fileName.add(file.getName());
+//                        // Print file names
+//                        System.out.println("File: " + file.getName());
+//                    }
+//                }
+//            }
+//        }
+//        return fileName;
+//    }
+
+//    public void fileExistCheck(String fileName, Long userId) {
+//        String[] getFileName = fileName.split("–");
+//        System.out.println(getFileName);
+//        // Check if the split was successful and extract the value
+//        String value = getFileName[1];  // This should be the part after '-'
+//        fileDelete(uploadDir.concat(fileName));
+//        System.out.println("Value after '-' is: " + value);
+//    }
 }
