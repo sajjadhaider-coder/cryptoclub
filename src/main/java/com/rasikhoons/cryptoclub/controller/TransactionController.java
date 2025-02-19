@@ -17,7 +17,7 @@ public class TransactionController {
     @Autowired
     private TransactionService transactionService;
 
-    @PostMapping
+    @PostMapping("/save")
     public ResponseEntity<?> save(@RequestBody TransactionDTO transactionDTO) {
         ApiResponse apiResponse = transactionService.save(transactionDTO);
         if (apiResponse.getCode() == HttpStatus.OK.value()) {

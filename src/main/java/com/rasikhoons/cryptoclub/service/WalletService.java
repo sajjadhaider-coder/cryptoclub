@@ -15,6 +15,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+import com.rasikhoons.cryptoclub.response.PaginationResponse.PaginationDetail;
 
 import java.io.File;
 import java.io.IOException;
@@ -35,17 +36,20 @@ public class WalletService {
     private WalletRepo walletRepo;
     @Value("${file.upload-dir}")
     private String uploadDir;
+    @Autowired
+    WalletLogService walletLogService;
 
     @Transactional
     public ApiResponse save(WalletDTO walletDTO) {
         ApiResponse apiResponse;
         try {
             Wallet wallet = mapper.map(walletDTO, Wallet.class);
-            if (walletDTO.getFile() != null) {
+            if (walletDTO.getFile() != null && !walletDTO.getFile().isEmpty()) {
                 wallet.setTransferAmount(uploadFile(walletDTO.getFile(), walletDTO.getUserId()));
             }
             wallet = walletRepo.save(wallet);
 
+            walletLogService.saveLogs(wallet.getId(), wallet.getBalance());
             WalletResponse walletResponse = mapper.map(wallet, WalletResponse.class);
             apiResponse = new ApiResponse(HttpStatus.OK.value(), "wallet save Successfully!", walletResponse);
         } catch (Exception e) {
@@ -62,12 +66,14 @@ public class WalletService {
             Optional<Wallet> wallet = walletRepo.findById(walletDTO.getId());
             if (wallet.isPresent()) {
                 mapper.map(walletDTO, wallet.get());
-                if (walletDTO.getFile() != null) {
+                if (walletDTO.getFile() != null && !walletDTO.getFile().isEmpty()) {
                     fileDelete(wallet.get().getTransferAmount());
                     wallet.get().setTransferAmount(uploadFile(walletDTO.getFile(), walletDTO.getUserId()));
                 }
                 wallet.get().setLastedUpdated(LocalDateTime.now());
                 walletRepo.save(wallet.get());
+                walletLogService.saveLogs(wallet.get().getId(), walletDTO.getBalance());
+
                 WalletResponse walletResponse = mapper.map(wallet.get(), WalletResponse.class);
                 apiResponse = new ApiResponse(HttpStatus.OK.value(), "wallet update Successfully!", walletResponse);
             } else {
@@ -89,7 +95,7 @@ public class WalletService {
                     fileDelete(wallet.get().getTransferAmount());
                 }
                 walletRepo.delete(wallet.get());
-
+                walletLogService.deleteLog(id);
                 apiResponse = new ApiResponse(HttpStatus.OK.value(), "wallet delete Successfully!", null);
             } else {
                 apiResponse = new ApiResponse(HttpStatus.BAD_REQUEST.value(), "wallet not found!", null);
@@ -135,7 +141,7 @@ public class WalletService {
                 Long totalElements = walletPage.getTotalElements();
                 long totalPages = totalElements / pageSize;
 
-                PaginationResponse.PaginationDetail paginationDetail = new PaginationResponse.PaginationDetail(pageNo, totalPages, pageSize,
+                PaginationDetail paginationDetail = new PaginationDetail(pageNo, totalPages, pageSize,
                         totalElements);
                 paginationResponse = new PaginationResponse(HttpStatus.OK.value(), "wallet found Successfully!", walletPageDTO, paginationDetail);
 

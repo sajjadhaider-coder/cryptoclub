@@ -20,7 +20,7 @@ public class WalletController {
     @Autowired
     private WalletService walletService;
 
-    @PostMapping
+    @PostMapping("/save")
     public ResponseEntity<?> save(@RequestParam Long userId, @RequestParam BigDecimal balance, @RequestPart MultipartFile file) {
         WalletDTO walletDTO = new WalletDTO();
         walletDTO.setUserId(userId);

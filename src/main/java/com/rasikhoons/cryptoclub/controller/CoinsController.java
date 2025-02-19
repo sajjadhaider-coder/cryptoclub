@@ -17,7 +17,7 @@ public class CoinsController {
     @Autowired
     private CoinsService coinsService;
 
-    @PostMapping
+    @PostMapping("/save")
     public ResponseEntity<?> save(@RequestBody CoinsDTO coinsDTO) {
         ApiResponse apiResponse = coinsService.save(coinsDTO);
         if (apiResponse.getCode() == HttpStatus.OK.value()) {

@@ -17,7 +17,7 @@ public class UserController {
     @Autowired
     private UserService userService;
 
-    @PostMapping
+    @PostMapping("/save")
     public ResponseEntity<?> save(@RequestBody UserDTO userDTO) {
         ApiResponse apiResponse = userService.save(userDTO);
         if (apiResponse.getCode() == HttpStatus.OK.value()) {
